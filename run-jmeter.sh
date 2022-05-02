@@ -19,3 +19,5 @@ if [[ ! -z "$USE_AWS" ]] && [[ ! -z "$TEST_PLAN_REPORT_S3_URI" ]]; then
   aws s3 cp report.zip ${TEST_PLAN_REPORT_S3_URI}
   echo "Report uploaded"
 fi
+
+rm test-plans/test-plan.jtl test-plans/jmeter.log && rm -rf report/
