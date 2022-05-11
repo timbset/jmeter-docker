@@ -13,6 +13,10 @@ TYPE=$(echo $AWS_EVENT | jq .type | tr -d '"')
 
 case $TYPE in
 
+  prepareTask)
+    /prepare-task.sh
+    ;;
+
   runTests)
     /run-tests.sh
     ;;
