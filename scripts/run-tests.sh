@@ -3,9 +3,14 @@
 EXECUTION_ID=$(echo $AWS_EVENT | jq .executionId | awk -F ":" '{print $8}' | tr -d '"')
 RESULTS_S3_PREFIX=$(echo $AWS_EVENT | jq .resultsS3Prefix | tr -d '"')
 TEST_PLAN_S3_URI=$(echo $AWS_EVENT | jq .testPlanS3Uri | tr -d '"')
+JMETER_EXTRA_PARAMS=$(echo $AWS_EVENT | jq .jmeterParams | tr -d '"')
 
 if [[ ! -z "$AWS_ACCESS_KEY_ID" ]] && [[ ! -z "$AWS_SECRET_ACCESS_KEY" ]]; then
   USE_AWS=1
+fi
+
+if [[ "$JMETER_EXTRA_PARAMS" == null ]]; then
+  JMETER_EXTRA_PARAMS=
 fi
 
 if [[ ! -z "$USE_AWS" ]]; then
@@ -15,7 +20,7 @@ if [[ ! -z "$USE_AWS" ]]; then
     || echo "Failed to download plan"
 fi
 
-/entrypoint.sh -n -t test-plans/test-plan.jmx -l test-plans/test-plan.jtl -j test-plans/jmeter.lo -e
+/entrypoint.sh -n -t test-plans/test-plan.jmx -l test-plans/test-plan.jtl -j test-plans/jmeter.lo -e ${JMETER_EXTRA_PARAMS}
 
 if [[ ! -z "$USE_AWS" ]] && [[ ! -z "$RESULTS_S3_PREFIX" ]]; then
   echo "Uploading results to ${RESULTS_S3_PREFIX}/${EXECUTION_ID}" \
