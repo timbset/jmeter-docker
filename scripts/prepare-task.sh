@@ -1,13 +1,36 @@
 #!/bin/bash
 
-COUNT=$(echo $AWS_EVENT | jq .count)
-ARRAY="0"
+if [[ ! -z $AWS_EVENT ]]
+then
+  COUNT=$(echo $AWS_EVENT | jq .count)
+fi
 
-COUNTER=COUNT
+if [[ -z $COUNT ]]
+then
+  echo "Count is required"
 
-while [[ $COUNT > 1 ]]; do
-	ARRAY="${ARRAY},0"
-	COUNT=$((COUNTER - 1))
+  if [[ ! -z $AWS_LAMBDA_RUNTIME_API ]]
+  then
+    curl -X POST -s "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$AWS_REQUEST_ID/error" \
+      -d "{\"errorMessage\":\"Count is required\",\"errorType\":\"InvalidEventDataException\"}"
+  fi
+
+  exit 1
+fi
+
+ARRAY="1"
+COUNTER=2
+
+while [[ $COUNTER -le $COUNT ]]
+do
+	ARRAY="${ARRAY},${COUNTER}"
+	COUNTER=$((COUNTER + 1))
 done
 
-curl -X POST -s "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$AWS_REQUEST_ID/response" -d "{\"items\":[$ARRAY]}"
+if [[ ! -z $AWS_LAMBDA_RUNTIME_API ]]
+then
+  curl -X POST -s "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$AWS_REQUEST_ID/response" \
+    -d "{\"items\":[$ARRAY]}"
+else
+  echo "Prepared array: $ARRAY"
+fi
