@@ -18,10 +18,10 @@ then
   exit 1
 fi
 
-ARRAY="1"
-COUNTER=2
+ARRAY="0"
+COUNTER=1
 
-while [[ $COUNTER -le $COUNT ]]
+while [[ $COUNTER < $COUNT ]]
 do
 	ARRAY="${ARRAY},${COUNTER}"
 	COUNTER=$((COUNTER + 1))

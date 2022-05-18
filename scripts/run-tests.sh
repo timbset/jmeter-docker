@@ -7,6 +7,7 @@ then
   TEST_PLAN_S3_URI=$(echo $AWS_EVENT | jq .testPlanS3Uri | tr -d '"')
   TEST_CONFIGS_S3_URI=$(echo $AWS_EVENT | jq .testConfigsS3Uri | tr -d '"')
   JMETER_EXTRA_PARAMS=$(echo $AWS_EVENT | jq .jmeterParams | tr -d '"')
+  INDEX=$(echo $AWS_EVENT | jq .index)
 else
   EXECUTION_ID=$(uuidgen | awk '{print tolower($0)}')
   echo "Execution ID is ${EXECUTION_ID}"
@@ -39,7 +40,10 @@ then
     || echo "Failed to download configs"
 fi
 
-/entrypoint.sh -n -t test-plans/test-plan.jmx -l test-plans/test-plan.jtl -j test-plans/jmeter.lo -e ${JMETER_EXTRA_PARAMS}
+/entrypoint.sh -n -t test-plans/test-plan.jmx \
+  -l test-plans/test-plan.jtl \
+  -j test-plans/jmeter.lo -e \
+  ${JMETER_EXTRA_PARAMS//\$INDEX/$INDEX}
 
 if [[ ! -z $USE_AWS ]] && [[ ! -z $RESULTS_S3_PREFIX ]]
 then
@@ -49,7 +53,7 @@ then
     || echo "Results upload failed"
 fi
 
-if [[ -z $AWS_LAMBDA_RUNTIME_API ]]
+if [[ ! -z $AWS_LAMBDA_RUNTIME_API ]]
 then
   curl -X POST -s "http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/runtime/invocation/$AWS_REQUEST_ID/response" -d "OK"
 fi
