@@ -20,8 +20,9 @@ fi
 
 ARRAY="0"
 COUNTER=1
+MAX=$((COUNT - 1))
 
-while [[ $COUNTER < $COUNT ]]
+while [[ $COUNTER -le $MAX ]]
 do
 	ARRAY="${ARRAY},${COUNTER}"
 	COUNTER=$((COUNTER + 1))
