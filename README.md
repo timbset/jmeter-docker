@@ -49,3 +49,41 @@ Sample value: `s3://my-bucket/results`
 Requires AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
   Puts every result file to following path: `$RESULTS_S3_PREFIX/$EXECUTION_ID/$AWS_REQUEST_ID.jtl`.
 Sample value: `s3://my-bucket/report`
+- `JMETER_EXTRA_PARAMS` - used for providing extra parameters for JMeter,
+for example, JMeter User Parameters (`-JMyVar1=MyValue1 -JMyVar2=MyValue2`)
+
+## Running in AWS Lambda
+
+### Running tests
+
+```json
+{
+  "type": "runTests",
+  "executionId": "step-function-execution-id",
+  "testPlanS3Uri": "s3://path/to-file",
+  "testConfigsS3Uri": "s3://path/to/folder",
+  "resultsS3Prefix": "s3://path/to/folder",
+  "jmeterParams": "-JMyVar1=MyValue2 -JMyVar2=MyValue2",
+  "index": 0
+}
+```
+
+### Preparing task (in AWS Step Function)
+
+```json
+{
+  "type": "prepareTask",
+  "count": 5
+}
+```
+
+### Building report
+
+```json
+{
+  "type": "buildReport",
+  "executionId": "step-function-execution-id",
+  "resultsS3Prefix": "s3://path/to/folder",
+  "reportsS3Prefix": "s3://path/to/folder"
+}
+```
